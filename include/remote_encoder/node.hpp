@@ -15,7 +15,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-namespace encoder {
+namespace remote_encoder {
 
 class Node : public rclcpp::Node {
  public:
@@ -26,6 +26,6 @@ class Node : public rclcpp::Node {
   rclcpp::Parameter prefix_;
 };
 
-}  // namespace encoder
+}  // namespace remote_encoder
 
 #endif  // OPENVMP_ENCODER_NODE_H

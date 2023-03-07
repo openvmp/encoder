@@ -7,9 +7,9 @@
  * Licensed under Apache License, Version 2.0.
  */
 
-#include "encoder/node.hpp"
+#include "remote_encoder/node.hpp"
 
-namespace encoder {
+namespace remote_encoder {
 
 Node::Node() : rclcpp::Node::Node("encoder_terminal") {
   this->declare_parameter("prefix", "/encoder/");
@@ -19,4 +19,4 @@ Node::Node() : rclcpp::Node::Node("encoder_terminal") {
   //                  or instantiate the UI, allow adhoc readings from encoders
 }
 
-}  // namespace encoder
+}  // namespace remote_encoder

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(encoder)
+project(remote_encoder)
 
 # Compiler settings
 if(NOT CMAKE_CXX_STANDARD)
@@ -30,6 +30,8 @@ include_directories(
 
 set(project_SOURCE_FILES
   src/interface.cpp
+  src/interface_remote.cpp
+  src/implementation.cpp
 )
 
 set(project_DEPENDENCIES
@@ -47,7 +49,7 @@ install(TARGETS
 )
 
 # Library target
-add_library(${PROJECT_NAME}_native ${project_SOURCE_FILES})
+add_library(${PROJECT_NAME}_native src/factory.cpp ${project_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME}_native ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
 ament_target_dependencies(${PROJECT_NAME}_native ${project_DEPENDENCIES})
 ament_export_targets(${PROJECT_NAME}_native_library HAS_LIBRARY_TARGET)

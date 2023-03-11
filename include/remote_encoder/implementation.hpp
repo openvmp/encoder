@@ -25,6 +25,8 @@ class Implementation : public Interface {
   Implementation(rclcpp::Node *node);
   virtual ~Implementation();
 
+  void init_encoder();
+
   virtual double velocity_get() override final;
   virtual double position_get() override final;
 
@@ -46,10 +48,11 @@ class Implementation : public Interface {
   void run_();
   void stop_();
 
+#ifdef REMOTE_ENCODER_USES_TOPICS
   // topics
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr topic_position_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr topic_velocity_;
-
+#else
   // services
   rclcpp::Service<remote_encoder::srv::PositionGet>::SharedPtr
       srv_position_get_;
@@ -62,6 +65,7 @@ class Implementation : public Interface {
   rclcpp::FutureReturnCode velocity_get_handler_(
       const std::shared_ptr<remote_encoder::srv::VelocityGet::Request> request,
       std::shared_ptr<remote_encoder::srv::VelocityGet::Response> response);
+#endif
 };
 
 }  // namespace remote_encoder

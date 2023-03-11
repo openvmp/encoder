@@ -18,7 +18,9 @@ namespace remote_encoder {
 std::shared_ptr<Interface> Factory::New(
     rclcpp::Node *node, const std::string &default_encoder_prefix) {
   rclcpp::Parameter is_remote;
-  node->declare_parameter("encoder_is_remote", true);
+  if (!node->has_parameter("encoder_is_remote")) {
+    node->declare_parameter("encoder_is_remote", true);
+  }
   node->get_parameter("encoder_is_remote", is_remote);
 
   if (is_remote.as_bool()) {

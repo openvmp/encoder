@@ -23,6 +23,10 @@
 #define REMOTE_ENCODER_SERVICE_POSITION_GET "/get_position"
 #define REMOTE_ENCODER_SERVICE_VELOCITY_GET "/get_velocity"
 
+#if 1
+#define REMOTE_ENCODER_USES_TOPICS
+#endif
+
 namespace remote_encoder {
 
 class Interface {

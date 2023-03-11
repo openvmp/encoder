@@ -30,6 +30,9 @@ class RemoteInterface final : public Interface {
   virtual double position_get() override;
   virtual double velocity_get() override;
 
+  void sub_position_handler_(const std_msgs::msg::Float64::SharedPtr);
+  void sub_velocity_handler_(const std_msgs::msg::Float64::SharedPtr);
+
  private:
   bool has_position_;
   bool has_velocity_;
@@ -41,9 +44,6 @@ class RemoteInterface final : public Interface {
       clnt_position_get_;
   rclcpp::Client<remote_encoder::srv::VelocityGet>::SharedPtr
       clnt_velocity_get_;
-
-  void sub_position_handler_(const std_msgs::msg::Float64::SharedPtr);
-  void sub_velocity_handler_(const std_msgs::msg::Float64::SharedPtr);
 
   rclcpp::Client<remote_encoder::srv::PositionGet>::SharedPtr
   get_clnt_position_get_();

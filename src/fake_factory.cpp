@@ -2,20 +2,21 @@
  * OpenVMP, 2023
  *
  * Author: Roman Kuzmenko
- * Created: 2023-03-05
+ * Created: 2023-03-18
  *
  * Licensed under Apache License, Version 2.0.
  */
 
-#include "remote_encoder/factory.hpp"
+#include "remote_encoder/fake_factory.hpp"
 
 #include <exception>
 
+#include "remote_encoder/fake_implementation.hpp"
 #include "remote_encoder/interface_remote.hpp"
 
 namespace remote_encoder {
 
-std::shared_ptr<Interface> Factory::New(
+std::shared_ptr<Interface> FakeFactory::New(
     rclcpp::Node *node, const std::string &default_encoder_prefix) {
   rclcpp::Parameter use_remote;
   if (!node->has_parameter("use_remote")) {
@@ -32,8 +33,7 @@ std::shared_ptr<Interface> Factory::New(
   if (is_remote.as_bool()) {
     return std::make_shared<RemoteInterface>(node, default_encoder_prefix);
   } else {
-    throw std::invalid_argument(
-        "Link with the actual driver or set encoder_is_remote");
+    return std::make_shared<FakeImplementation>(node);
   }
 }
 

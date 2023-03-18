@@ -47,9 +47,12 @@ FakeImplementation::FakeImplementation(rclcpp::Node *node)
           std::bind(&FakeImplementation::sub_velocity_handler_, this,
                     std::placeholders::_1));
 
-  period_ = std::chrono::seconds(1) / 100.0;
-  thread_ = std::shared_ptr<std::thread>(
-      new std::thread(&FakeImplementation::run_, this));
+  auto readings_per_second = param_readings_.as_double();
+  if (readings_per_second > 0.0) {
+    period_ = std::chrono::seconds(1) / readings_per_second;
+    thread_ = std::shared_ptr<std::thread>(
+        new std::thread(&FakeImplementation::run_, this));
+  }
 }
 
 FakeImplementation::~FakeImplementation() {

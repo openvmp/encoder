@@ -46,9 +46,15 @@ void RemoteInterface::sub_velocity_handler_(
   readings_mutex_.unlock();
 }
 
-rclcpp::Client<remote_encoder::srv::PositionGet>::SharedPtr
-RemoteInterface::get_clnt_position_get_() {
-  if (!clnt_position_get_) {
+void RemoteInterface::get_clnt_position_get_() {
+  if (!
+#ifdef REMOTE_ENCODER_USES_TOPICS
+      sub_position_
+#else
+      clnt_position_get_
+#endif
+
+  ) {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
@@ -56,7 +62,8 @@ RemoteInterface::get_clnt_position_get_() {
         prefix + REMOTE_ENCODER_TOPIC_POSITION, 1,
         std::bind(&RemoteInterface::sub_position_handler_, this,
                   std::placeholders::_1));
-    has_position_ = sub_position_->get_publisher_count() > 0;
+    has_position_ = true;  // FIXME(clairbee)
+    // has_position_ = sub_position_->get_publisher_count() > 0;
 #else
     clnt_position_get_ = node_->create_client<remote_encoder::srv::PositionGet>(
         prefix + REMOTE_ENCODER_SERVICE_POSITION_GET, ::rmw_qos_profile_default,
@@ -64,7 +71,7 @@ RemoteInterface::get_clnt_position_get_() {
 
     if (clnt_position_get_) {
       has_position_ =
-          clnt_position_get_->wait_for_service(std::chrono::milliseconds(250));
+          clnt_position_get_->wait_for_service(std::chrono::milliseconds(1250));
     } else {
       has_position_ = false;
     }
@@ -75,12 +82,16 @@ RemoteInterface::get_clnt_position_get_() {
                    prefix.c_str());
     }
   }
-  return clnt_position_get_;
 }
 
-rclcpp::Client<remote_encoder::srv::VelocityGet>::SharedPtr
-RemoteInterface::get_clnt_velocity_get_() {
-  if (!clnt_velocity_get_) {
+void RemoteInterface::get_clnt_velocity_get_() {
+  if (!
+#ifdef REMOTE_ENCODER_USES_TOPICS
+      sub_velocity_
+#else
+      clnt_velocity_get_
+#endif
+  ) {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
@@ -88,7 +99,8 @@ RemoteInterface::get_clnt_velocity_get_() {
         prefix + REMOTE_ENCODER_TOPIC_VELOCITY, 1,
         std::bind(&RemoteInterface::sub_velocity_handler_, this,
                   std::placeholders::_1));
-    has_velocity_ = sub_velocity_->get_publisher_count() > 0;
+    has_velocity_ = true;  // FIXME(clairbee)
+    // has_velocity_ = sub_velocity_->get_publisher_count() > 0;
 #else
     clnt_velocity_get_ = node_->create_client<remote_encoder::srv::VelocityGet>(
         prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET, ::rmw_qos_profile_default,
@@ -107,7 +119,6 @@ RemoteInterface::get_clnt_velocity_get_() {
                    prefix.c_str());
     }
   }
-  return clnt_velocity_get_;
 }
 
 bool RemoteInterface::has_position() {

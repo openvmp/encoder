@@ -45,10 +45,8 @@ class RemoteInterface final : public Interface {
   rclcpp::Client<remote_encoder::srv::VelocityGet>::SharedPtr
       clnt_velocity_get_;
 
-  rclcpp::Client<remote_encoder::srv::PositionGet>::SharedPtr
-  get_clnt_position_get_();
-  rclcpp::Client<remote_encoder::srv::VelocityGet>::SharedPtr
-  get_clnt_velocity_get_();
+  void get_clnt_position_get_();
+  void get_clnt_velocity_get_();
 };
 
 }  // namespace remote_encoder

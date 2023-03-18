@@ -30,9 +30,8 @@ void Implementation::init_encoder() {
 #ifdef REMOTE_ENCODER_USES_TOPICS
     topic_position_ = node_->create_publisher<std_msgs::msg::Float64>(
         prefix + REMOTE_ENCODER_TOPIC_POSITION,
-        // rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
-        // |
-        rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
+        rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT |
+            rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
 #else
     srv_position_get_ = node_->create_service<remote_encoder::srv::PositionGet>(
         prefix + REMOTE_ENCODER_SERVICE_POSITION_GET,
@@ -45,9 +44,8 @@ void Implementation::init_encoder() {
 #ifdef REMOTE_ENCODER_USES_TOPICS
     topic_velocity_ = node_->create_publisher<std_msgs::msg::Float64>(
         prefix + REMOTE_ENCODER_TOPIC_VELOCITY,
-        // rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
-        // |
-        rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
+        rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT |
+            rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
 #else
     srv_velocity_get_ = node_->create_service<remote_encoder::srv::VelocityGet>(
         prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET,

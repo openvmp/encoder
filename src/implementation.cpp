@@ -26,33 +26,37 @@ Implementation::Implementation(rclcpp::Node *node) : Interface(node) {
 void Implementation::init_encoder() {
   auto prefix = get_prefix_();
 
+  rmw_qos_profile_t rmw = {
+      .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+      .depth = 1,
+      .reliability =
+          rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+      .durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+      .deadline = {0, 50000000},
+      .lifespan = {0, 50000000},
+      .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
+      .liveliness_lease_duration = {0, 0},
+      .avoid_ros_namespace_conventions = false,
+  };
+  auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
+
   if (has_position()) {
-#ifdef REMOTE_ENCODER_USES_TOPICS
     topic_position_ = node_->create_publisher<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_POSITION,
-        rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT |
-            rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
-#else
+        prefix + REMOTE_ENCODER_TOPIC_POSITION, qos);
     srv_position_get_ = node_->create_service<remote_encoder::srv::PositionGet>(
         prefix + REMOTE_ENCODER_SERVICE_POSITION_GET,
         std::bind(&Implementation::position_get_handler_, this,
                   std::placeholders::_1, std::placeholders::_2),
         ::rmw_qos_profile_default, callback_group_);
-#endif
   }
   if (has_velocity()) {
-#ifdef REMOTE_ENCODER_USES_TOPICS
     topic_velocity_ = node_->create_publisher<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_VELOCITY,
-        rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT |
-            rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST);
-#else
+        prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos);
     srv_velocity_get_ = node_->create_service<remote_encoder::srv::VelocityGet>(
         prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET,
         std::bind(&Implementation::velocity_get_handler_, this,
                   std::placeholders::_1, std::placeholders::_2),
         ::rmw_qos_profile_default, callback_group_);
-#endif
   }
 
   if ((has_position() || has_velocity()) && param_readings_.as_double() > 0.0) {
@@ -62,7 +66,6 @@ void Implementation::init_encoder() {
   }
 }
 
-#ifndef REMOTE_ENCODER_USES_TOPICS
 rclcpp::FutureReturnCode Implementation::position_get_handler_(
     const std::shared_ptr<remote_encoder::srv::PositionGet::Request> request,
     std::shared_ptr<remote_encoder::srv::PositionGet::Response> response) {
@@ -82,7 +85,6 @@ rclcpp::FutureReturnCode Implementation::velocity_get_handler_(
   response->exception_code = 0;
   return rclcpp::FutureReturnCode::SUCCESS;
 }
-#endif
 
 double Implementation::position_get() {
   readings_mutex_.lock();

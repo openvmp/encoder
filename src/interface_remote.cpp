@@ -58,8 +58,22 @@ void RemoteInterface::get_clnt_position_get_() {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
+    rmw_qos_profile_t rmw = {
+        .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        .depth = 1,
+        .reliability = rmw_qos_reliability_policy_t::
+            RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+        .durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+        .deadline = {0, 50000000},
+        .lifespan = {0, 50000000},
+        .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
+        .liveliness_lease_duration = {0, 0},
+        .avoid_ros_namespace_conventions = false,
+    };
+    auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
+
     sub_position_ = node_->create_subscription<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_POSITION, 1,
+        prefix + REMOTE_ENCODER_TOPIC_POSITION, qos,
         std::bind(&RemoteInterface::sub_position_handler_, this,
                   std::placeholders::_1));
     has_position_ = true;  // FIXME(clairbee)
@@ -95,8 +109,22 @@ void RemoteInterface::get_clnt_velocity_get_() {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
+    rmw_qos_profile_t rmw = {
+        .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        .depth = 1,
+        .reliability = rmw_qos_reliability_policy_t::
+            RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+        .durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+        .deadline = {0, 50000000},
+        .lifespan = {0, 50000000},
+        .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
+        .liveliness_lease_duration = {0, 0},
+        .avoid_ros_namespace_conventions = false,
+    };
+    auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
+
     sub_velocity_ = node_->create_subscription<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_VELOCITY, 1,
+        prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos,
         std::bind(&RemoteInterface::sub_velocity_handler_, this,
                   std::placeholders::_1));
     has_velocity_ = true;  // FIXME(clairbee)

@@ -15,7 +15,7 @@ namespace remote_encoder {
 
 Interface::Interface(rclcpp::Node *node,
                      const std::string &default_encoder_prefix)
-    : node_{node} {
+    : node_{node}, position_last_{0.0}, velocity_last_{0.0} {
   callback_group_ =
       node->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 

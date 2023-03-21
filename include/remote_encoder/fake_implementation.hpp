@@ -37,16 +37,16 @@ class FakeImplementation : public Implementation {
   virtual void velocity_get_real_() override;
 
  private:
-  std::shared_ptr<std::thread> thread_;
-  volatile bool do_stop_;
-  std::chrono::duration<double, std::ratio<1L>> period_;
+  std::shared_ptr<std::thread> fake_thread_;
+  volatile bool fake_do_stop_;
+  std::chrono::duration<double, std::ratio<1L>> fake_period_;
 
-  void run_();
-  void stop_();
+  void fake_run_();
+  void fake_stop_();
 
+  // double actuator_velocity_actual_;
   double actuator_position_last_;
   double actuator_velocity_last_;
-  double actuator_velocity_actual_;
 
   void sub_position_handler_(const std_msgs::msg::Float64::SharedPtr);
   void sub_velocity_handler_(const std_msgs::msg::Float64::SharedPtr);

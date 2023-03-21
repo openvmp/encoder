@@ -11,10 +11,10 @@
 
 namespace remote_encoder {
 
-Implementation::Implementation(rclcpp::Node *node) : Interface(node) {
-  position_last_ = 0.0;
-  velocity_last_ = 0.0;
-  velocity_last_position_ = 0.0;
+Implementation::Implementation(rclcpp::Node *node)
+        : Interface(node),
+          velocity_last_position_{0.0},
+          do_stop_{false} {
   velocity_last_time_ = std::chrono::high_resolution_clock::now();
 
   if (!node->has_parameter("encoder_readings_per_second")) {
@@ -122,7 +122,7 @@ void Implementation::run_() {
     position_get_real_();
     auto position_last = position_last_;
     velocity_get_real_();
-    auto velocity_last = position_last_;
+    auto velocity_last = velocity_last_;
     readings_mutex_.unlock();
 
     topic_position_->publish(std_msgs::msg::Float64().set__data(position_last));

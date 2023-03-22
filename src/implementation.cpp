@@ -36,7 +36,7 @@ void Implementation::init_encoder() {
       .depth = 1,
       .reliability =
           rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-      .durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+      .durability = RMW_QOS_POLICY_DURABILITY_VOLATILE,
       .deadline = {0, 50000000},
       .lifespan = {0, 50000000},
       .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,

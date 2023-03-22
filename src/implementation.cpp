@@ -21,6 +21,11 @@ Implementation::Implementation(rclcpp::Node *node)
     node->declare_parameter("encoder_readings_per_second", 0.0);
   }
   node->get_parameter("encoder_readings_per_second", param_readings_);
+
+  if (!node->has_parameter("encoder_overflow")) {
+    node->declare_parameter("encoder_overflow", false);
+  }
+  node->get_parameter("encoder_overflow", param_overflow_);
 }
 
 void Implementation::init_encoder() {
@@ -49,15 +54,15 @@ void Implementation::init_encoder() {
                   std::placeholders::_1, std::placeholders::_2),
         ::rmw_qos_profile_default, callback_group_);
   }
-  if (has_velocity()) {
-    topic_velocity_ = node_->create_publisher<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos);
-    srv_velocity_get_ = node_->create_service<remote_encoder::srv::VelocityGet>(
-        prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET,
-        std::bind(&Implementation::velocity_get_handler_, this,
-                  std::placeholders::_1, std::placeholders::_2),
-        ::rmw_qos_profile_default, callback_group_);
-  }
+
+  // If the encoder does not have velocity features then this module approximates it anyway
+  topic_velocity_ = node_->create_publisher<std_msgs::msg::Float64>(
+      prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos);
+  srv_velocity_get_ = node_->create_service<remote_encoder::srv::VelocityGet>(
+      prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET,
+      std::bind(&Implementation::velocity_get_handler_, this,
+                std::placeholders::_1, std::placeholders::_2),
+      ::rmw_qos_profile_default, callback_group_);
 
   if ((has_position() || has_velocity()) && param_readings_.as_double() > 0.0) {
     period_ = std::chrono::seconds(1) / param_readings_.as_double();
@@ -116,16 +121,22 @@ void Implementation::stop_() {
 }
 
 void Implementation::run_() {
+  bool do_position = has_position();
+
   while (!do_stop_) {
     std::this_thread::sleep_for(period_);
     readings_mutex_.lock();
-    position_get_real_();
+    if (do_position) {
+      position_get_real_();
+    }
     auto position_last = position_last_;
     velocity_get_real_();
     auto velocity_last = velocity_last_;
     readings_mutex_.unlock();
 
-    topic_position_->publish(std_msgs::msg::Float64().set__data(position_last));
+    if (do_position) {
+      topic_position_->publish(std_msgs::msg::Float64().set__data(position_last));
+    }
     topic_velocity_->publish(std_msgs::msg::Float64().set__data(velocity_last));
   }
 }

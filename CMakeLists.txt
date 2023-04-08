@@ -3,7 +3,7 @@ project(remote_encoder)
 
 # Compiler settings
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -22,8 +22,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/PositionGet.srv"
   "srv/VelocityGet.srv"
 )
-rosidl_get_typesupport_target(cpp_typesupport_target
-  ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 include_directories(
   include
@@ -57,7 +55,6 @@ set(project_DEPENDENCIES
 
 # Executable targets
 add_executable(${PROJECT_NAME}_terminal ${terminal_SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME}_terminal ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
 ament_target_dependencies(${PROJECT_NAME}_terminal ${project_DEPENDENCIES})
 install(TARGETS
   ${PROJECT_NAME}_terminal
@@ -65,7 +62,6 @@ install(TARGETS
 )
 
 add_executable("fake" ${fake_SOURCE_FILES})
-target_link_libraries("fake" ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
 ament_target_dependencies("fake" ${project_DEPENDENCIES})
 install(TARGETS
   "fake"
@@ -74,7 +70,6 @@ install(TARGETS
 
 # Library target
 add_library(${PROJECT_NAME}_native src/factory.cpp ${project_SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME}_native ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
 ament_target_dependencies(${PROJECT_NAME}_native ${project_DEPENDENCIES})
 ament_export_targets(${PROJECT_NAME}_native_library HAS_LIBRARY_TARGET)
 install(TARGETS ${PROJECT_NAME}_native
@@ -83,7 +78,6 @@ install(TARGETS ${PROJECT_NAME}_native
 )
 
 add_library(${PROJECT_NAME}_fake src/fake_factory.cpp ${fake_SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME}_fake ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
 ament_target_dependencies(${PROJECT_NAME}_fake ${project_DEPENDENCIES})
 ament_export_targets(${PROJECT_NAME}_fake_library HAS_LIBRARY_TARGET)
 install(TARGETS ${PROJECT_NAME}_fake
@@ -98,6 +92,24 @@ install(
 ament_export_dependencies(${project_DEPENDENCIES})
 ament_export_include_directories(include)
 
+
+if($ENV{ROS_DISTRO} STREQUAL "foxy")
+rosidl_target_interfaces(${PROJECT_NAME}_terminal
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces("fake"
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces(${PROJECT_NAME}_native
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces(${PROJECT_NAME}_fake
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+else()
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(${PROJECT_NAME}_terminal ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
+target_link_libraries("fake" ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
+target_link_libraries(${PROJECT_NAME}_native ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
+target_link_libraries(${PROJECT_NAME}_fake ${rclcpp_LIBRARIES} "${cpp_typesupport_target}")
+endif()
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

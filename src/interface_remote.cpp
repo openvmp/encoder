@@ -58,19 +58,9 @@ void RemoteInterface::get_clnt_position_get_() {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
-    rmw_qos_profile_t rmw = {
-        .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-        .depth = 1,
-        .reliability = rmw_qos_reliability_policy_t::
-            RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-        .durability = RMW_QOS_POLICY_DURABILITY_VOLATILE,
-        .deadline = {0, 50000000},
-        .lifespan = {0, 50000000},
-        .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
-        .liveliness_lease_duration = {0, 0},
-        .avoid_ros_namespace_conventions = false,
-    };
-    auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
+    auto qos = rclcpp::QoS(
+        rclcpp::QoSInitialization::from_rmw(::rmw_qos_profile_sensor_data),
+        ::rmw_qos_profile_sensor_data);
 
     sub_position_ = node_->create_subscription<std_msgs::msg::Float64>(
         prefix + REMOTE_ENCODER_TOPIC_POSITION, qos,
@@ -79,9 +69,11 @@ void RemoteInterface::get_clnt_position_get_() {
     has_position_ = true;  // FIXME(clairbee)
     // has_position_ = sub_position_->get_publisher_count() > 0;
 #else
+    auto qos = rclcpp::QoS(
+        rclcpp::QoSInitialization::from_rmw(::rmw_qos_profile_sensor_data),
+        ::rmw_qos_profile_sensor_data);
     clnt_position_get_ = node_->create_client<remote_encoder::srv::PositionGet>(
-        prefix + REMOTE_ENCODER_SERVICE_POSITION_GET, ::rmw_qos_profile_default,
-        callback_group_);
+        prefix + REMOTE_ENCODER_SERVICE_POSITION_GET, qos, callback_group_);
 
     if (clnt_position_get_) {
       has_position_ =
@@ -109,19 +101,9 @@ void RemoteInterface::get_clnt_velocity_get_() {
     auto prefix = get_prefix_();
 
 #ifdef REMOTE_ENCODER_USES_TOPICS
-    rmw_qos_profile_t rmw = {
-        .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-        .depth = 1,
-        .reliability = rmw_qos_reliability_policy_t::
-            RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-        .durability = RMW_QOS_POLICY_DURABILITY_VOLATILE,
-        .deadline = {0, 50000000},
-        .lifespan = {0, 50000000},
-        .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
-        .liveliness_lease_duration = {0, 0},
-        .avoid_ros_namespace_conventions = false,
-    };
-    auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
+    auto qos = rclcpp::QoS(
+        rclcpp::QoSInitialization::from_rmw(::rmw_qos_profile_sensor_data),
+        ::rmw_qos_profile_sensor_data);
 
     sub_velocity_ = node_->create_subscription<std_msgs::msg::Float64>(
         prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos,
@@ -130,9 +112,11 @@ void RemoteInterface::get_clnt_velocity_get_() {
     has_velocity_ = true;  // FIXME(clairbee)
     // has_velocity_ = sub_velocity_->get_publisher_count() > 0;
 #else
+    auto qos = rclcpp::QoS(
+        rclcpp::QoSInitialization::from_rmw(::rmw_qos_profile_sensor_data),
+        ::rmw_qos_profile_sensor_data);
     clnt_velocity_get_ = node_->create_client<remote_encoder::srv::VelocityGet>(
-        prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET, ::rmw_qos_profile_default,
-        callback_group_);
+        prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET, qos, callback_group_);
 
     if (clnt_velocity_get_) {
       has_velocity_ =

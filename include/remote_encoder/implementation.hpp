@@ -25,8 +25,6 @@ class Implementation : public Interface {
   Implementation(rclcpp::Node *node);
   virtual ~Implementation();
 
-  void init_encoder();
-
   virtual double velocity_get() override final;
   virtual double position_get() override final;
 
@@ -36,6 +34,8 @@ class Implementation : public Interface {
 
   double velocity_last_position_;
   std::chrono::high_resolution_clock::time_point velocity_last_time_;
+
+  void init_encoder_();
 
   virtual void position_get_real_() = 0;
   virtual void velocity_get_real_();

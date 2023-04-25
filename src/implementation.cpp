@@ -12,9 +12,7 @@
 namespace remote_encoder {
 
 Implementation::Implementation(rclcpp::Node *node)
-        : Interface(node),
-          velocity_last_position_{0.0},
-          do_stop_{false} {
+    : Interface(node), velocity_last_position_{0.0}, do_stop_{false} {
   velocity_last_time_ = std::chrono::high_resolution_clock::now();
 
   if (!node->has_parameter("encoder_readings_per_second")) {
@@ -28,26 +26,12 @@ Implementation::Implementation(rclcpp::Node *node)
   node->get_parameter("encoder_overflow", param_overflow_);
 }
 
-void Implementation::init_encoder() {
+void Implementation::init_encoder_() {
   auto prefix = get_prefix_();
-
-  rmw_qos_profile_t rmw = {
-      .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-      .depth = 1,
-      .reliability =
-          rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-      .durability = RMW_QOS_POLICY_DURABILITY_VOLATILE,
-      .deadline = {0, 50000000},
-      .lifespan = {0, 50000000},
-      .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
-      .liveliness_lease_duration = {0, 0},
-      .avoid_ros_namespace_conventions = false,
-  };
-  auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
 
   if (has_position()) {
     topic_position_ = node_->create_publisher<std_msgs::msg::Float64>(
-        prefix + REMOTE_ENCODER_TOPIC_POSITION, qos);
+        prefix + REMOTE_ENCODER_TOPIC_POSITION, 10);
     srv_position_get_ = node_->create_service<remote_encoder::srv::PositionGet>(
         prefix + REMOTE_ENCODER_SERVICE_POSITION_GET,
         std::bind(&Implementation::position_get_handler_, this,
@@ -55,9 +39,10 @@ void Implementation::init_encoder() {
         ::rmw_qos_profile_default, callback_group_);
   }
 
-  // If the encoder does not have velocity features then this module approximates it anyway
+  // If the encoder does not have velocity features then this module
+  // approximates it anyway
   topic_velocity_ = node_->create_publisher<std_msgs::msg::Float64>(
-      prefix + REMOTE_ENCODER_TOPIC_VELOCITY, qos);
+      prefix + REMOTE_ENCODER_TOPIC_VELOCITY, 10);
   srv_velocity_get_ = node_->create_service<remote_encoder::srv::VelocityGet>(
       prefix + REMOTE_ENCODER_SERVICE_VELOCITY_GET,
       std::bind(&Implementation::velocity_get_handler_, this,
@@ -135,7 +120,8 @@ void Implementation::run_() {
     readings_mutex_.unlock();
 
     if (do_position) {
-      topic_position_->publish(std_msgs::msg::Float64().set__data(position_last));
+      topic_position_->publish(
+          std_msgs::msg::Float64().set__data(position_last));
     }
     topic_velocity_->publish(std_msgs::msg::Float64().set__data(velocity_last));
   }

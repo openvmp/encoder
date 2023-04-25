@@ -22,7 +22,7 @@ FakeImplementation::FakeImplementation(rclcpp::Node *node)
       // actuator_velocity_actual_{0.0},
       actuator_position_last_{0.0},
       actuator_velocity_last_{0.0} {
-  init_encoder();
+  init_encoder_();
 
   auto actuator_prefix = get_prefix_();
   std::string from = "encoder";
@@ -36,29 +36,15 @@ FakeImplementation::FakeImplementation(rclcpp::Node *node)
   }
   // 'actuator_prefix' now points at the corresponding actuator
 
-  rmw_qos_profile_t rmw = {
-      .history = rmw_qos_history_policy_t::RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-      .depth = 1,
-      .reliability =
-          rmw_qos_reliability_policy_t::RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-      .durability = RMW_QOS_POLICY_DURABILITY_VOLATILE,
-      .deadline = {0, 50000000},
-      .lifespan = {0, 50000000},
-      .liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
-      .liveliness_lease_duration = {0, 0},
-      .avoid_ros_namespace_conventions = false,
-  };
-  auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw), rmw);
-
   subscription_actuator_position_ =
       node_->create_subscription<std_msgs::msg::Float64>(
-          actuator_prefix + REMOTE_ACTUATOR_TOPIC_POSITION, qos,
+          actuator_prefix + REMOTE_ACTUATOR_TOPIC_POSITION, 10,
           std::bind(&FakeImplementation::sub_position_handler_, this,
                     std::placeholders::_1));
 
   subscription_actuator_velocity_ =
       node_->create_subscription<std_msgs::msg::Float64>(
-          actuator_prefix + REMOTE_ACTUATOR_TOPIC_VELOCITY, qos,
+          actuator_prefix + REMOTE_ACTUATOR_TOPIC_VELOCITY, 10,
           std::bind(&FakeImplementation::sub_velocity_handler_, this,
                     std::placeholders::_1));
 
@@ -85,11 +71,10 @@ void FakeImplementation::fake_run_() {
 
     readings_mutex_.lock();
     actuator_position_last_ += actuator_velocity_last_ / readings_per_second;
-    // actuator_position_last_ += actuator_velocity_actual_ / readings_per_second;
-    // auto delta = (actuator_velocity_last_ - actuator_velocity_actual_);
-    // auto step = delta / 2.0;
-    // if (::abs(step) < 0.02) step = delta;
-    // actuator_velocity_actual_ += step;
+    // actuator_position_last_ += actuator_velocity_actual_ /
+    // readings_per_second; auto delta = (actuator_velocity_last_ -
+    // actuator_velocity_actual_); auto step = delta / 2.0; if (::abs(step) <
+    // 0.02) step = delta; actuator_velocity_actual_ += step;
     readings_mutex_.unlock();
   }
 }

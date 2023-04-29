@@ -132,7 +132,7 @@ void Implementation::velocity_get_real_() {
   auto time_delta = std::chrono::duration_cast<std::chrono::duration<double>>(
       now - velocity_last_time_);
   auto position_delta = position_last_ - velocity_last_position_;
-  if (param_overflow_.as_bool() && ::abs(position_delta) > 0.5) {
+  if (param_overflow_.as_bool() && std::fabs(position_delta) > 0.5) {
     // If this is a single turn encoder then,
     // for the sake of velocity calculation,
     // we need to compensate for the integer overrun (underrun).

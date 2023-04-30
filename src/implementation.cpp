@@ -102,7 +102,10 @@ Implementation::~Implementation() { stop_(); }
 
 void Implementation::stop_() {
   do_stop_ = true;
-  thread_->join();
+  if (thread_.get()) {
+    thread_->join();
+    thread_.reset();
+  }
 }
 
 void Implementation::run_() {
